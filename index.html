@@ -4,10 +4,283 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sacred Scriptures - Bible App</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#667eea">
-    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .header {
+            background: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo-icon {
+            font-size: 2rem;
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: background-color 0.3s;
+        }
+
+        .theme-toggle:hover {
+            background-color: #f0f0f0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 6rem auto 2rem;
+            padding: 0 2rem;
+        }
+
+        .search-container {
+            background: white;
+            border-radius: 50px;
+            padding: 0.5rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .search-container input {
+            flex: 1;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            font-size: 1rem;
+            border-radius: 50px;
+            outline: none;
+        }
+
+        .search-container button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: transform 0.3s;
+        }
+
+        .search-container button:hover {
+            transform: scale(1.05);
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            background: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 500;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .nav-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .books-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .book-card {
+            background: white;
+            padding: 1rem;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+        }
+
+        .book-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .chapters-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            justify-content: center;
+        }
+
+        .chapter-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+        }
+
+        .chapter-btn:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .back-btn {
+            background: transparent;
+            border: 2px solid #667eea;
+            color: #667eea;
+            padding: 0.5rem 1.5rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            margin: 1rem 0;
+            transition: all 0.3s;
+        }
+
+        .back-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .bible-content {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin-top: 2rem;
+        }
+
+        .verse-number {
+            color: #667eea;
+            font-weight: 600;
+            margin-right: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .verse-text {
+            margin-bottom: 1rem;
+            line-height: 1.8;
+            padding: 0.5rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .book-title {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .chapter-title {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 2rem;
+        }
+
+        .selected-book {
+            font-size: 2rem;
+            color: #667eea;
+            margin-bottom: 1rem;
+        }
+
+        .bookmark-star {
+            color: gold;
+            margin-left: 0.5rem;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 2rem auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
+            }
+            
+            .books-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+            
+            .book-title {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
 </head>
 <body>
     <header class="header">
@@ -30,24 +303,313 @@
             <button class="nav-btn" onclick="showBookmarks()" id="bookmarksBtn">Bookmarks</button>
         </div>
 
-        <div id="booksView" style="display: block;">
+        <!-- Books View -->
+        <div id="booksView">
             <div class="books-grid" id="booksGrid"></div>
         </div>
 
-        <div id="chaptersView" style="display: none;">
-            <h2 id="selectedBookTitle"></h2>
+        <!-- Chapters View -->
+        <div id="chaptersView" class="hidden">
+            <h2 class="selected-book" id="selectedBookTitle"></h2>
             <button class="back-btn" onclick="backToBooks()">← Back to Books</button>
             <div class="chapters-container" id="chaptersGrid"></div>
         </div>
 
+        <!-- Bible Content -->
         <div class="bible-content" id="bibleContent">
-            <div class="book-title" id="currentBookTitle">Welcome</div>
-            <div class="chapter-title" id="currentChapter">Select a book and chapter to begin reading</div>
+            <div class="book-title" id="currentBookTitle">Welcome to Sacred Scriptures</div>
+            <div class="chapter-title" id="currentChapter">Click on any book to start reading</div>
             <div id="verses"></div>
         </div>
     </div>
 
-    <script src="bible-data.js"></script>
-    <script src="app.js"></script>
+    <script>
+        // Bible Data
+        const bibleData = {
+            books: [
+                "Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy",
+                "Joshua", "Judges", "Ruth", "1 Samuel", "2 Samuel",
+                "1 Kings", "2 Kings", "1 Chronicles", "2 Chronicles", "Ezra",
+                "Nehemiah", "Esther", "Job", "Psalms", "Proverbs",
+                "Ecclesiastes", "Song of Solomon", "Isaiah", "Jeremiah", "Lamentations",
+                "Ezekiel", "Daniel", "Hosea", "Joel", "Amos",
+                "Obadiah", "Jonah", "Micah", "Nahum", "Habakkuk",
+                "Zephaniah", "Haggai", "Zechariah", "Malachi",
+                "Matthew", "Mark", "Luke", "John", "Acts",
+                "Romans", "1 Corinthians", "2 Corinthians", "Galatians", "Ephesians",
+                "Philippians", "Colossians", "1 Thessalonians", "2 Thessalonians",
+                "1 Timothy", "2 Timothy", "Titus", "Philemon", "Hebrews",
+                "James", "1 Peter", "2 Peter", "1 John", "2 John",
+                "3 John", "Jude", "Revelation"
+            ],
+            
+            chapterCounts: {
+                "Genesis": 50, "Exodus": 40, "Leviticus": 27, "Numbers": 36, "Deuteronomy": 34,
+                "Joshua": 24, "Judges": 21, "Ruth": 4, "1 Samuel": 31, "2 Samuel": 24,
+                "1 Kings": 22, "2 Kings": 25, "1 Chronicles": 29, "2 Chronicles": 36, "Ezra": 10,
+                "Nehemiah": 13, "Esther": 10, "Job": 42, "Psalms": 150, "Proverbs": 31,
+                "Ecclesiastes": 12, "Song of Solomon": 8, "Isaiah": 66, "Jeremiah": 52, "Lamentations": 5,
+                "Ezekiel": 48, "Daniel": 12, "Hosea": 14, "Joel": 3, "Amos": 9,
+                "Obadiah": 1, "Jonah": 4, "Micah": 7, "Nahum": 3, "Habakkuk": 3,
+                "Zephaniah": 3, "Haggai": 2, "Zechariah": 14, "Malachi": 4,
+                "Matthew": 28, "Mark": 16, "Luke": 24, "John": 21, "Acts": 28,
+                "Romans": 16, "1 Corinthians": 16, "2 Corinthians": 13, "Galatians": 6, "Ephesians": 6,
+                "Philippians": 4, "Colossians": 4, "1 Thessalonians": 5, "2 Thessalonians": 3,
+                "1 Timothy": 6, "2 Timothy": 4, "Titus": 3, "Philemon": 1, "Hebrews": 13,
+                "James": 5, "1 Peter": 5, "2 Peter": 3, "1 John": 5, "2 John": 1,
+                "3 John": 1, "Jude": 1, "Revelation": 22
+            },
+            
+            popularVerses: {
+                "John 3:16": "For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life.",
+                "Psalm 23:1": "The Lord is my shepherd; I shall not want.",
+                "Proverbs 3:5": "Trust in the Lord with all your heart and lean not on your own understanding.",
+                "Romans 8:28": "And we know that in all things God works for the good of those who love him, who have been called according to his purpose.",
+                "Philippians 4:13": "I can do all things through him who strengthens me."
+            }
+        };
+
+        // App State
+        let currentBook = '';
+        let currentChapter = 1;
+        let bookmarks = JSON.parse(localStorage.getItem('bibleBookmarks')) || [];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            displayBooks();
+            checkTheme();
+        });
+
+        // Display all books
+        function displayBooks() {
+            const booksGrid = document.getElementById('booksGrid');
+            booksGrid.innerHTML = '';
+            
+            bibleData.books.forEach(book => {
+                const bookCard = document.createElement('div');
+                bookCard.className = 'book-card';
+                bookCard.textContent = book;
+                bookCard.onclick = () => selectBook(book);
+                booksGrid.appendChild(bookCard);
+            });
+        }
+
+        // Select a book
+        function selectBook(book) {
+            currentBook = book;
+            document.getElementById('selectedBookTitle').textContent = book;
+            document.getElementById('booksView').classList.add('hidden');
+            document.getElementById('chaptersView').classList.remove('hidden');
+            
+            const chaptersGrid = document.getElementById('chaptersGrid');
+            chaptersGrid.innerHTML = '';
+            
+            const chapterCount = bibleData.chapterCounts[book] || 30;
+            
+            for(let i = 1; i <= chapterCount; i++) {
+                const chapterBtn = document.createElement('button');
+                chapterBtn.className = 'chapter-btn';
+                chapterBtn.textContent = i;
+                chapterBtn.onclick = () => selectChapter(book, i);
+                chaptersGrid.appendChild(chapterBtn);
+            }
+        }
+
+        // Go back to books
+        function backToBooks() {
+            document.getElementById('booksView').classList.remove('hidden');
+            document.getElementById('chaptersView').classList.add('hidden');
+        }
+
+        // Select a chapter
+        function selectChapter(book, chapter) {
+            currentBook = book;
+            currentChapter = chapter;
+            
+            document.getElementById('booksView').classList.remove('hidden');
+            document.getElementById('chaptersView').classList.add('hidden');
+            
+            document.getElementById('currentBookTitle').textContent = book;
+            document.getElementById('currentChapter').textContent = `Chapter ${chapter}`;
+            
+            // Show loading spinner
+            const versesDiv = document.getElementById('verses');
+            versesDiv.innerHTML = '<div class="spinner"></div>';
+            
+            // Simulate loading verses
+            setTimeout(() => {
+                let verses = '';
+                const verseCount = book === 'Psalms' ? 30 : 25;
+                
+                for(let i = 1; i <= verseCount; i++) {
+                    const verseRef = `${book} ${chapter}:${i}`;
+                    const isBookmarked = bookmarks.includes(verseRef);
+                    
+                    verses += `<div class="verse-text">
+                        <span class="verse-number">${i}</span>
+                        This is a sample verse from ${book} chapter ${chapter}. In a complete Bible app, this would contain the actual scripture text.
+                        <span class="bookmark-star" onclick="toggleBookmark('${verseRef}')">${isBookmarked ? '★' : '☆'}</span>
+                    </div>`;
+                }
+                versesDiv.innerHTML = verses;
+            }, 500);
+        }
+
+        // Show books view
+        function showBooks() {
+            document.getElementById('booksView').classList.remove('hidden');
+            document.getElementById('chaptersView').classList.add('hidden');
+            updateActiveNav('booksBtn');
+        }
+
+        // Show daily verse
+        function showDailyVerse() {
+            document.getElementById('booksView').classList.remove('hidden');
+            document.getElementById('chaptersView').classList.add('hidden');
+            updateActiveNav('dailyBtn');
+            
+            const verses = Object.entries(bibleData.popularVerses);
+            const randomVerse = verses[Math.floor(Math.random() * verses.length)];
+            
+            document.getElementById('currentBookTitle').textContent = 'Daily Verse';
+            document.getElementById('currentChapter').textContent = randomVerse[0];
+            document.getElementById('verses').innerHTML = `
+                <div class="verse-text">
+                    <span class="verse-number">📖</span>
+                    ${randomVerse[1]}
+                    <span class="bookmark-star" onclick="toggleBookmark('${randomVerse[0]}')">${bookmarks.includes(randomVerse[0]) ? '★' : '☆'}</span>
+                </div>
+            `;
+        }
+
+        // Show bookmarks
+        function showBookmarks() {
+            document.getElementById('booksView').classList.remove('hidden');
+            document.getElementById('chaptersView').classList.add('hidden');
+            updateActiveNav('bookmarksBtn');
+            
+            if(bookmarks.length > 0) {
+                document.getElementById('currentBookTitle').textContent = 'Bookmarks';
+                document.getElementById('currentChapter').textContent = 'Your saved verses';
+                
+                let bookmarksHtml = '';
+                bookmarks.forEach(verse => {
+                    const verseText = bibleData.popularVerses[verse] || 'Saved verse';
+                    bookmarksHtml += `
+                        <div class="verse-text" style="cursor: pointer;" onclick="loadVerse('${verse}')">
+                            <span class="verse-number">📖</span>
+                            <strong>${verse}</strong>: ${verseText}
+                            <span class="bookmark-star" onclick="event.stopPropagation(); toggleBookmark('${verse}')">★</span>
+                        </div>
+                    `;
+                });
+                document.getElementById('verses').innerHTML = bookmarksHtml;
+            } else {
+                document.getElementById('verses').innerHTML = '<div class="verse-text">No bookmarks yet. Click on the star icon next to verses to bookmark them.</div>';
+            }
+        }
+
+        // Toggle bookmark
+        function toggleBookmark(verseRef) {
+            const index = bookmarks.indexOf(verseRef);
+            if(index === -1) {
+                bookmarks.push(verseRef);
+                alert('Bookmark added!');
+            } else {
+                bookmarks.splice(index, 1);
+                alert('Bookmark removed');
+            }
+            localStorage.setItem('bibleBookmarks', JSON.stringify(bookmarks));
+        }
+
+        // Search for verses
+        function searchVerse() {
+            const searchTerm = document.getElementById('searchInput').value.trim();
+            
+            if(bibleData.popularVerses[searchTerm]) {
+                document.getElementById('currentBookTitle').textContent = 'Search Result';
+                document.getElementById('currentChapter').textContent = searchTerm;
+                document.getElementById('verses').innerHTML = `
+                    <div class="verse-text">
+                        <span class="verse-number">📖</span>
+                        ${bibleData.popularVerses[searchTerm]}
+                        <span class="bookmark-star" onclick="toggleBookmark('${searchTerm}')">${bookmarks.includes(searchTerm) ? '★' : '☆'}</span>
+                    </div>
+                `;
+            } else {
+                alert('Verse not found. Try: John 3:16, Psalm 23:1, etc.');
+            }
+        }
+
+        // Toggle theme
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            const themeToggle = document.getElementById('themeToggle');
+            themeToggle.textContent = document.body.classList.contains('dark-mode') ? '☀️' : '🌙';
+            localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+        }
+
+        // Check theme
+        function checkTheme() {
+            if(localStorage.getItem('theme') === 'dark') {
+                document.body.classList.add('dark-mode');
+                document.getElementById('themeToggle').textContent = '☀️';
+            }
+        }
+
+        // Update active nav
+        function updateActiveNav(activeId) {
+            document.getElementById('booksBtn').classList.remove('active');
+            document.getElementById('dailyBtn').classList.remove('active');
+            document.getElementById('bookmarksBtn').classList.remove('active');
+            document.getElementById(activeId).classList.add('active');
+        }
+
+        // Load verse
+        function loadVerse(verseRef) {
+            const [book, chapterVerse] = verseRef.split(' ');
+            const [chapter, verse] = chapterVerse.split(':');
+            selectChapter(book, parseInt(chapter));
+        }
+    </script>
+
+    <style>
+        /* Dark mode styles */
+        body.dark-mode {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        }
+
+        body.dark-mode .header {
+            background: #1f1f2f;
+            color: white;
+        }
+
+        body.dark-mode .bible-content,
+        body.dark-mode .book-card,
+        body.dark-mode .chapter-btn,
+        body.dark-mode .nav-btn,
+        body.dark-mode .search-container {
+            background: #2a2a3a;
+            color: white;
+        }
+
+        body.dark-mode .verse-text {
+            color: #e0e0e0;
+            border-bottom-color: #444;
+        }
+
+        body.dark-mode .chapter-title {
+            color: #b0b0b0;
+        }
+
+        body.dark-mode .search-container input {
+            color: white;
+            background: transparent;
+        }
+
+        body.dark-mode .search-container input::placeholder {
+            color: #888;
+        }
+    </style>
 </body>
 </html>
