@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sacred Scriptures - Bible App</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#667eea">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            <span class="logo-icon">📖</span>
+            <h1>Sacred Scriptures</h1>
+        </div>
+        <button class="theme-toggle" onclick="toggleTheme()" id="themeToggle">🌙</button>
+    </header>
+
+    <div class="container">
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Search for verses (e.g., John 3:16)">
+            <button onclick="searchVerse()">Search</button>
+        </div>
+
+        <div class="nav-buttons">
+            <button class="nav-btn active" onclick="showBooks()" id="booksBtn">Books</button>
+            <button class="nav-btn" onclick="showDailyVerse()" id="dailyBtn">Daily Verse</button>
+            <button class="nav-btn" onclick="showBookmarks()" id="bookmarksBtn">Bookmarks</button>
+        </div>
+
+        <div id="booksView" style="display: block;">
+            <div class="books-grid" id="booksGrid"></div>
+        </div>
+
+        <div id="chaptersView" style="display: none;">
+            <h2 id="selectedBookTitle"></h2>
+            <button class="back-btn" onclick="backToBooks()">← Back to Books</button>
+            <div class="chapters-container" id="chaptersGrid"></div>
+        </div>
+
+        <div class="bible-content" id="bibleContent">
+            <div class="book-title" id="currentBookTitle">Welcome</div>
+            <div class="chapter-title" id="currentChapter">Select a book and chapter to begin reading</div>
+            <div id="verses"></div>
+        </div>
+    </div>
+
+    <script src="bible-data.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
