@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sacred Scriptures - Bible App</title>
+    <title>Sacred Scriptures - Bible App with Audio</title>
     <style>
         * {
             margin: 0;
@@ -207,6 +207,60 @@
             margin-top: 2rem;
         }
 
+        /* Audio Controls */
+        .audio-controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            align-items: center;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 50px;
+        }
+
+        .audio-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s;
+        }
+
+        .audio-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .audio-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .voice-select {
+            padding: 0.8rem;
+            border-radius: 25px;
+            border: 1px solid #ddd;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .speed-control {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .speed-control input {
+            width: 100px;
+        }
+
         .verse-number {
             color: #667eea;
             font-weight: 600;
@@ -219,6 +273,42 @@
             line-height: 1.8;
             padding: 0.5rem;
             border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .verse-content {
+            flex: 1;
+        }
+
+        .play-verse-btn {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0.3rem;
+            border-radius: 50%;
+            transition: all 0.3s;
+            color: #667eea;
+        }
+
+        .play-verse-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .play-verse-btn.playing {
+            background: #667eea;
+            color: white;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
         }
 
         .book-title {
@@ -267,6 +357,22 @@
             display: none;
         }
 
+        .status-message {
+            padding: 0.5rem;
+            border-radius: 5px;
+            margin: 0.5rem 0;
+        }
+
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 0 1rem;
@@ -278,6 +384,15 @@
             
             .book-title {
                 font-size: 1.5rem;
+            }
+            
+            .audio-controls {
+                flex-direction: column;
+                border-radius: 15px;
+            }
+            
+            .voice-select {
+                width: 100%;
             }
         }
     </style>
@@ -301,6 +416,22 @@
             <button class="nav-btn active" onclick="showBooks()" id="booksBtn">Books</button>
             <button class="nav-btn" onclick="showDailyVerse()" id="dailyBtn">Daily Verse</button>
             <button class="nav-btn" onclick="showBookmarks()" id="bookmarksBtn">Bookmarks</button>
+        </div>
+
+        <!-- Audio Controls -->
+        <div class="audio-controls">
+            <button class="audio-btn" onclick="speakChapter()" id="speakChapterBtn">
+                <span>🔊</span> Read Chapter
+            </button>
+            <button class="audio-btn" onclick="stopSpeaking()" id="stopBtn">
+                <span>⏹️</span> Stop
+            </button>
+            <select class="voice-select" id="voiceSelect"></select>
+            <div class="speed-control">
+                <label>Speed:</label>
+                <input type="range" id="rate" min="0.5" max="2" value="1" step="0.1">
+                <span id="rateValue">1x</span>
+            </div>
         </div>
 
         <!-- Books View -->
@@ -360,25 +491,229 @@
                 "3 John": 1, "Jude": 1, "Revelation": 22
             },
             
-            popularVerses: {
-                "John 3:16": "For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life.",
-                "Psalm 23:1": "The Lord is my shepherd; I shall not want.",
-                "Proverbs 3:5": "Trust in the Lord with all your heart and lean not on your own understanding.",
-                "Romans 8:28": "And we know that in all things God works for the good of those who love him, who have been called according to his purpose.",
-                "Philippians 4:13": "I can do all things through him who strengthens me."
+            // Sample verses for demonstration
+            getVersesForChapter(book, chapter) {
+                const verses = [];
+                const verseCount = book === 'Psalms' ? 30 : 25;
+                
+                const verseTemplates = [
+                    "In the beginning God created the heavens and the earth.",
+                    "The Lord is my shepherd; I shall not want.",
+                    "For God so loved the world that he gave his one and only Son.",
+                    "Trust in the Lord with all your heart and lean not on your own understanding.",
+                    "I can do all things through Christ who strengthens me.",
+                    "Be strong and courageous. Do not be afraid.",
+                    "The Lord is my light and my salvation—whom shall I fear?",
+                    "This is the day that the Lord has made; let us rejoice and be glad in it.",
+                    "Love is patient, love is kind.",
+                    "Ask and it will be given to you; seek and you will find."
+                ];
+                
+                for(let i = 1; i <= verseCount; i++) {
+                    const templateIndex = i % verseTemplates.length;
+                    verses.push({
+                        number: i,
+                        text: `${verseTemplates[templateIndex]} (Sample verse ${i} from ${book} ${chapter})`
+                    });
+                }
+                
+                return verses;
             }
         };
 
         // App State
         let currentBook = '';
         let currentChapter = 1;
+        let currentVerses = [];
         let bookmarks = JSON.parse(localStorage.getItem('bibleBookmarks')) || [];
+        
+        // Speech Synthesis
+        let speechSynthesis = window.speechSynthesis;
+        let voices = [];
+        let currentUtterance = null;
+        let isSpeaking = false;
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             displayBooks();
             checkTheme();
+            loadVoices();
+            setupSpeechControls();
         });
+
+        // Load available voices
+        function loadVoices() {
+            voices = speechSynthesis.getVoices();
+            
+            if (voices.length === 0) {
+                speechSynthesis.addEventListener('voiceschanged', () => {
+                    voices = speechSynthesis.getVoices();
+                    populateVoiceList();
+                });
+            } else {
+                populateVoiceList();
+            }
+        }
+
+        // Populate voice selection dropdown
+        function populateVoiceList() {
+            const voiceSelect = document.getElementById('voiceSelect');
+            voiceSelect.innerHTML = '';
+            
+            voices.forEach((voice, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = `${voice.name} (${voice.lang})`;
+                
+                if (voice.default) {
+                    option.textContent += ' [Default]';
+                }
+                
+                voiceSelect.appendChild(option);
+            });
+        }
+
+        // Setup speech controls
+        function setupSpeechControls() {
+            const rateControl = document.getElementById('rate');
+            const rateValue = document.getElementById('rateValue');
+            
+            rateControl.addEventListener('input', () => {
+                rateValue.textContent = rateControl.value + 'x';
+            });
+        }
+
+        // Speak a verse
+        function speakVerse(verseNumber) {
+            if (!currentVerses || currentVerses.length === 0) return;
+            
+            const verse = currentVerses.find(v => v.number === verseNumber);
+            if (!verse) return;
+            
+            stopSpeaking();
+            
+            const text = `${currentBook} ${currentChapter}, verse ${verse.number}. ${verse.text}`;
+            
+            currentUtterance = new SpeechSynthesisUtterance(text);
+            
+            // Set voice
+            const voiceSelect = document.getElementById('voiceSelect');
+            const rate = document.getElementById('rate');
+            
+            if (voices[voiceSelect.value]) {
+                currentUtterance.voice = voices[voiceSelect.value];
+            }
+            
+            currentUtterance.rate = parseFloat(rate.value);
+            currentUtterance.pitch = 1;
+            
+            // Event handlers
+            currentUtterance.onstart = () => {
+                isSpeaking = true;
+                highlightVerse(verseNumber);
+            };
+            
+            currentUtterance.onend = () => {
+                isSpeaking = false;
+                removeHighlight();
+            };
+            
+            currentUtterance.onerror = () => {
+                isSpeaking = false;
+                removeHighlight();
+                showStatus('Error playing audio', 'error');
+            };
+            
+            speechSynthesis.speak(currentUtterance);
+        }
+
+        // Speak entire chapter
+        function speakChapter() {
+            if (!currentVerses || currentVerses.length === 0) {
+                showStatus('No verses to read', 'error');
+                return;
+            }
+            
+            stopSpeaking();
+            
+            let fullText = `${currentBook} ${currentChapter}. `;
+            currentVerses.forEach(verse => {
+                fullText += `Verse ${verse.number}. ${verse.text}. `;
+            });
+            
+            currentUtterance = new SpeechSynthesisUtterance(fullText);
+            
+            const voiceSelect = document.getElementById('voiceSelect');
+            const rate = document.getElementById('rate');
+            
+            if (voices[voiceSelect.value]) {
+                currentUtterance.voice = voices[voiceSelect.value];
+            }
+            
+            currentUtterance.rate = parseFloat(rate.value);
+            currentUtterance.pitch = 1;
+            
+            currentUtterance.onstart = () => {
+                isSpeaking = true;
+                document.getElementById('speakChapterBtn').style.opacity = '0.5';
+            };
+            
+            currentUtterance.onend = () => {
+                isSpeaking = false;
+                document.getElementById('speakChapterBtn').style.opacity = '1';
+                removeHighlight();
+            };
+            
+            currentUtterance.onerror = () => {
+                isSpeaking = false;
+                document.getElementById('speakChapterBtn').style.opacity = '1';
+                removeHighlight();
+                showStatus('Error playing audio', 'error');
+            };
+            
+            speechSynthesis.speak(currentUtterance);
+        }
+
+        // Stop speaking
+        function stopSpeaking() {
+            if (speechSynthesis.speaking) {
+                speechSynthesis.cancel();
+            }
+            isSpeaking = false;
+            removeHighlight();
+            document.getElementById('speakChapterBtn').style.opacity = '1';
+        }
+
+        // Highlight current verse
+        function highlightVerse(verseNumber) {
+            removeHighlight();
+            const verseElement = document.getElementById(`verse-${verseNumber}`);
+            if (verseElement) {
+                verseElement.style.backgroundColor = '#fff3cd';
+                verseElement.style.transition = 'background-color 0.3s';
+            }
+        }
+
+        // Remove highlight
+        function removeHighlight() {
+            document.querySelectorAll('.verse-text').forEach(el => {
+                el.style.backgroundColor = '';
+            });
+        }
+
+        // Show status message
+        function showStatus(message, type) {
+            const statusDiv = document.createElement('div');
+            statusDiv.className = `status-message status-${type}`;
+            statusDiv.textContent = message;
+            
+            const bibleContent = document.getElementById('bibleContent');
+            bibleContent.insertBefore(statusDiv, bibleContent.firstChild);
+            
+            setTimeout(() => {
+                statusDiv.remove();
+            }, 3000);
+        }
 
         // Display all books
         function displayBooks() {
@@ -438,19 +773,22 @@
             
             // Simulate loading verses
             setTimeout(() => {
-                let verses = '';
-                const verseCount = book === 'Psalms' ? 30 : 25;
+                currentVerses = bibleData.getVersesForChapter(book, chapter);
                 
-                for(let i = 1; i <= verseCount; i++) {
-                    const verseRef = `${book} ${chapter}:${i}`;
+                let verses = '';
+                currentVerses.forEach(verse => {
+                    const verseRef = `${book} ${chapter}:${verse.number}`;
                     const isBookmarked = bookmarks.includes(verseRef);
                     
-                    verses += `<div class="verse-text">
-                        <span class="verse-number">${i}</span>
-                        This is a sample verse from ${book} chapter ${chapter}. In a complete Bible app, this would contain the actual scripture text.
-                        <span class="bookmark-star" onclick="toggleBookmark('${verseRef}')">${isBookmarked ? '★' : '☆'}</span>
+                    verses += `<div class="verse-text" id="verse-${verse.number}">
+                        <button class="play-verse-btn" onclick="speakVerse(${verse.number})" title="Play this verse">🔊</button>
+                        <div class="verse-content">
+                            <span class="verse-number">${verse.number}</span>
+                            ${verse.text}
+                            <span class="bookmark-star" onclick="toggleBookmark('${verseRef}')">${isBookmarked ? '★' : '☆'}</span>
+                        </div>
                     </div>`;
-                }
+                });
                 versesDiv.innerHTML = verses;
             }, 500);
         }
@@ -468,16 +806,23 @@
             document.getElementById('chaptersView').classList.add('hidden');
             updateActiveNav('dailyBtn');
             
-            const verses = Object.entries(bibleData.popularVerses);
-            const randomVerse = verses[Math.floor(Math.random() * verses.length)];
+            const books = bibleData.books;
+            const randomBook = books[Math.floor(Math.random() * books.length)];
+            const randomChapter = Math.floor(Math.random() * 20) + 1;
+            const randomVerse = Math.floor(Math.random() * 20) + 1;
+            
+            const verseText = bibleData.getVersesForChapter(randomBook, randomChapter)[0].text;
             
             document.getElementById('currentBookTitle').textContent = 'Daily Verse';
-            document.getElementById('currentChapter').textContent = randomVerse[0];
+            document.getElementById('currentChapter').textContent = `${randomBook} ${randomChapter}:${randomVerse}`;
             document.getElementById('verses').innerHTML = `
                 <div class="verse-text">
-                    <span class="verse-number">📖</span>
-                    ${randomVerse[1]}
-                    <span class="bookmark-star" onclick="toggleBookmark('${randomVerse[0]}')">${bookmarks.includes(randomVerse[0]) ? '★' : '☆'}</span>
+                    <button class="play-verse-btn" onclick="speakVerse(${randomVerse})" title="Play this verse">🔊</button>
+                    <div class="verse-content">
+                        <span class="verse-number">📖</span>
+                        ${verseText}
+                        <span class="bookmark-star" onclick="toggleBookmark('${randomBook} ${randomChapter}:${randomVerse}')">☆</span>
+                    </div>
                 </div>
             `;
         }
@@ -494,12 +839,14 @@
                 
                 let bookmarksHtml = '';
                 bookmarks.forEach(verse => {
-                    const verseText = bibleData.popularVerses[verse] || 'Saved verse';
                     bookmarksHtml += `
                         <div class="verse-text" style="cursor: pointer;" onclick="loadVerse('${verse}')">
-                            <span class="verse-number">📖</span>
-                            <strong>${verse}</strong>: ${verseText}
-                            <span class="bookmark-star" onclick="event.stopPropagation(); toggleBookmark('${verse}')">★</span>
+                            <button class="play-verse-btn" onclick="event.stopPropagation(); speakBookmarkedVerse('${verse}')" title="Play this verse">🔊</button>
+                            <div class="verse-content">
+                                <span class="verse-number">📖</span>
+                                <strong>${verse}</strong>
+                                <span class="bookmark-star" onclick="event.stopPropagation(); toggleBookmark('${verse}')">★</span>
+                            </div>
                         </div>
                     `;
                 });
@@ -509,15 +856,34 @@
             }
         }
 
+        // Speak bookmarked verse
+        function speakBookmarkedVerse(verseRef) {
+            stopSpeaking();
+            
+            currentUtterance = new SpeechSynthesisUtterance(verseRef);
+            
+            const voiceSelect = document.getElementById('voiceSelect');
+            const rate = document.getElementById('rate');
+            
+            if (voices[voiceSelect.value]) {
+                currentUtterance.voice = voices[voiceSelect.value];
+            }
+            
+            currentUtterance.rate = parseFloat(rate.value);
+            currentUtterance.pitch = 1;
+            
+            speechSynthesis.speak(currentUtterance);
+        }
+
         // Toggle bookmark
         function toggleBookmark(verseRef) {
             const index = bookmarks.indexOf(verseRef);
             if(index === -1) {
                 bookmarks.push(verseRef);
-                alert('Bookmark added!');
+                showStatus('Bookmark added!', 'success');
             } else {
                 bookmarks.splice(index, 1);
-                alert('Bookmark removed');
+                showStatus('Bookmark removed', 'success');
             }
             localStorage.setItem('bibleBookmarks', JSON.stringify(bookmarks));
         }
@@ -526,19 +892,23 @@
         function searchVerse() {
             const searchTerm = document.getElementById('searchInput').value.trim();
             
-            if(bibleData.popularVerses[searchTerm]) {
-                document.getElementById('currentBookTitle').textContent = 'Search Result';
-                document.getElementById('currentChapter').textContent = searchTerm;
-                document.getElementById('verses').innerHTML = `
-                    <div class="verse-text">
-                        <span class="verse-number">📖</span>
-                        ${bibleData.popularVerses[searchTerm]}
-                        <span class="bookmark-star" onclick="toggleBookmark('${searchTerm}')">${bookmarks.includes(searchTerm) ? '★' : '☆'}</span>
-                    </div>
-                `;
-            } else {
-                alert('Verse not found. Try: John 3:16, Psalm 23:1, etc.');
+            if (searchTerm.includes(':')) {
+                const [book, chapterVerse] = searchTerm.split(' ');
+                if (chapterVerse) {
+                    const [chapter, verse] = chapterVerse.split(':');
+                    const bookIndex = bibleData.books.findIndex(b => 
+                        b.toLowerCase() === book.toLowerCase()
+                    );
+                    
+                    if (bookIndex !== -1) {
+                        selectChapter(bibleData.books[bookIndex], parseInt(chapter));
+                        showStatus(`Loaded ${searchTerm}`, 'success');
+                        return;
+                    }
+                }
             }
+            
+            showStatus('Verse not found. Try format: "John 3:16"', 'error');
         }
 
         // Toggle theme
@@ -568,7 +938,7 @@
         // Load verse
         function loadVerse(verseRef) {
             const [book, chapterVerse] = verseRef.split(' ');
-            const [chapter, verse] = chapterVerse.split(':');
+            const [chapter] = chapterVerse.split(':');
             selectChapter(book, parseInt(chapter));
         }
     </script>
@@ -588,7 +958,8 @@
         body.dark-mode .book-card,
         body.dark-mode .chapter-btn,
         body.dark-mode .nav-btn,
-        body.dark-mode .search-container {
+        body.dark-mode .search-container,
+        body.dark-mode .audio-controls {
             background: #2a2a3a;
             color: white;
         }
@@ -609,6 +980,21 @@
 
         body.dark-mode .search-container input::placeholder {
             color: #888;
+        }
+
+        body.dark-mode .voice-select {
+            background: #2a2a3a;
+            color: white;
+            border-color: #444;
+        }
+
+        body.dark-mode .speed-control input {
+            background: #2a2a3a;
+            color: white;
+        }
+
+        body.dark-mode .verse-text.highlighted {
+            background-color: #3a3a4a !important;
         }
     </style>
 </body>
